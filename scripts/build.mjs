@@ -6,9 +6,27 @@ import { renderPage } from '../src/templates/site.mjs';
 import { site } from '../site.config.mjs';
 import { applyAnalyticsConsent } from './analytics-consent.mjs';
 import { applyShareableCalculations } from './shareable-calculations.mjs';
+import { applyCalculationExplanations } from './calculation-explanations.mjs';
 
 const verificationTag = '<meta name="google-site-verification" content="EwTiLP4eMZK5K7W9U_5tpM7cvJsn4ZaLvRwKYrmuuV0">';
 const shareableForms = ['equal-form', 'fit-form', 'cut-form'];
+const explanations = {
+  'equal-form': {
+    formula: 'altura libre = altura interior − reserva inferior − reserva superior − (nº baldas × grosor); hueco = altura libre ÷ (nº baldas + 1)',
+    fields: [['innerHeight', 'Altura interior', 'cm'], ['shelfCount', 'Número de baldas'], ['shelfThickness', 'Grosor de balda', 'cm'], ['reserveBottom', 'Reserva inferior', 'cm'], ['reserveTop', 'Reserva superior', 'cm']],
+    note: 'Las marcas de cada balda se construyen acumulando huecos iguales y el grosor de las baldas anteriores.'
+  },
+  'fit-form': {
+    formula: 'altura mínima por hueco = alto del objeto + holgura; nº máximo de baldas = suelo((altura útil − altura mínima) ÷ (grosor de balda + altura mínima)); después se reparte el espacio restante por igual',
+    fields: [['innerHeight', 'Altura interior', 'cm'], ['itemHeight', 'Alto del objeto', 'cm'], ['clearance', 'Holgura', 'cm'], ['shelfThickness', 'Grosor de balda', 'cm'], ['reserveBottom', 'Reserva inferior', 'cm'], ['reserveTop', 'Reserva superior', 'cm']],
+    note: 'El número se redondea hacia abajo para garantizar que todos los objetos caben con la holgura solicitada.'
+  },
+  'cut-form': {
+    formula: 'ancho interior = ancho exterior − 2 × grosor; alto interior = alto exterior − 2 × grosor; área total = suma(largo × ancho × cantidad) de todas las piezas',
+    fields: [['outerWidth', 'Ancho exterior', 'cm'], ['outerHeight', 'Alto exterior', 'cm'], ['depth', 'Fondo', 'cm'], ['panelThickness', 'Grosor del tablero', 'cm'], ['shelfCount', 'Baldas interiores'], ['setback', 'Retranqueo de baldas', 'cm']],
+    note: 'El despiece es geométrico: antes de cortar conviene añadir pérdidas, ancho de sierra, canteado y sentido de veta.'
+  }
+};
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.join(root, 'dist');
 await rm(dist, { recursive: true, force: true });
@@ -25,6 +43,7 @@ for (const page of pages) {
     storageKey: 'em:v1:analytics-consent'
   });
   html = applyShareableCalculations(html, shareableForms);
+  html = applyCalculationExplanations(html, explanations);
   if (page.path === '') html = html.replace('<head>', `<head>\n  ${verificationTag}`);
   await writeFile(destination, html, 'utf8');
 }
