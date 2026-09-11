@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "project": "EstanteMedido",
+  "northStar": "A woodworking job ticket where every shelf, dimension and part feels ready to move from sketch to saw.",
+  "palette": {
+    "ink": "#202421",
+    "paper": "#f2efe7",
+    "plywood": "#dfba83",
+    "safetyOrange": "#f05a28",
+    "highVisLime": "#d7eb45"
+  },
+  "typography": {
+    "display": "Arial Narrow / Roboto Condensed / Aptos Narrow",
+    "body": "Segoe UI Variable / Aptos",
+    "measurements": "Cascadia Mono / Consolas"
+  },
+  "geometry": {
+    "corners": "square",
+    "depth": "hard ink and safety-orange offsets",
+    "motif": "cut boards and annotated elevation drawings"
+  },
+  "motion": {
+    "buttonPress": "140ms",
+    "reducedMotion": true
+  },
+  "breakpoints": [840, 580],
+  "components": ["shelf-brand-mark", "annotated-elevation-hero", "operation-card", "measurement-form", "workshop-result-panel"]
+}
