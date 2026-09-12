@@ -1,0 +1,13 @@
+.commerce-entry,.commerce-prelude,.commerce-methodology{max-width:1120px;margin:0 auto 72px;padding:0 24px}
+.commerce-entry__box,.commerce-prelude__box{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;padding:28px;background:var(--ink);color:var(--white);border:2px solid var(--ink);box-shadow:8px 8px 0 var(--lime)}
+.commerce-entry__box .eyebrow,.commerce-prelude__box .eyebrow{color:var(--orange)!important}.commerce-entry__box .eyebrow::before,.commerce-entry__box .eyebrow::after,.commerce-prelude__box .eyebrow::before,.commerce-prelude__box .eyebrow::after{color:var(--white)!important}
+.commerce-entry__box h2,.commerce-prelude__box h2{color:var(--white);font-size:clamp(2rem,4vw,3.5rem);margin:.2em 0 .35em}
+.commerce-entry__box p,.commerce-prelude__box p{margin:0;max-width:760px;color:#d9dedb}
+.commerce-entry__box .button,.commerce-prelude__box .button{min-width:260px;background:var(--orange);color:var(--ink);border-color:var(--white);box-shadow:5px 5px 0 var(--white)}
+.commerce-prelude{margin-top:-20px;margin-bottom:64px}.commerce-prelude__status{margin-top:12px!important;font:700 .75rem var(--mono);color:var(--lime)!important}.commerce-prelude__status[data-error="true"]{color:#ffb8a2!important}
+.commerce-methodology{border-top:2px solid var(--ink);padding-top:34px}.commerce-methodology h2{font-size:clamp(2rem,4vw,3.5rem)}.commerce-methodology>p{max-width:860px;color:var(--muted)}
+.commerce-methodology-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--ink);border:2px solid var(--ink);margin-top:28px}.commerce-methodology-grid article{background:var(--panel);padding:22px}.commerce-methodology-grid strong{display:block;font:950 2rem var(--display);color:var(--orange);margin-bottom:6px}.commerce-methodology-grid span{font-size:.86rem;color:var(--muted)}
+.result-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:1rem}.result-actions .button{width:100%;margin-top:0}.result .button--secondary{background:var(--panel);color:var(--ink);border-color:var(--white);box-shadow:5px 5px 0 var(--white)}.result .button--secondary:hover{background:var(--lime);color:var(--ink)}.result .button--commerce{background:var(--orange);color:var(--ink);border-color:var(--white);box-shadow:5px 5px 0 var(--white)}
+.page-lista-corte-estanteria #cut-result .mv{display:none!important}
+@media(max-width:760px){.commerce-entry__box,.commerce-prelude__box{grid-template-columns:1fr}.commerce-entry__box .button,.commerce-prelude__box .button{width:100%;min-width:0}.commerce-methodology-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.commerce-entry,.commerce-prelude,.commerce-methodology{padding:0 14px}.result-actions{grid-template-columns:1fr}}
