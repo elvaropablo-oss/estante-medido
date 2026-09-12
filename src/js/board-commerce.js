@@ -18,7 +18,7 @@ try{
 function ensureStyles(){
   if(document.querySelector('link[data-board-commerce-style]'))return;
   const link=document.createElement('link');
-  link.rel='stylesheet';link.href='/estante-medido/assets/commerce.css?v=20260912-1';link.dataset.boardCommerceStyle='';document.head.appendChild(link);
+  link.rel='stylesheet';link.href='/estante-medido/assets/commerce.css?v=20260912-2';link.dataset.boardCommerceStyle='';document.head.appendChild(link);
 }
 
 function ensureSection(){
@@ -27,9 +27,10 @@ function ensureSection(){
   section=document.createElement('section');
   section.id='board-commerce';section.className='commerce';section.setAttribute('aria-labelledby','board-commerce-title');
   section.innerHTML=`
-    <div class="commerce-head"><div><p class="eyebrow">Compra calculada</p><h2 id="board-commerce-title">Tableros reales para tu despiece</h2><p>Comprobamos si todas las piezas caben en formatos comerciales del mismo grosor y estimamos tableros, coste y desperdicio.</p></div>
-      <label class="commerce-sort">Ordenar por<select data-commerce-sort><option value="value">Calidad-precio</option><option value="cost">Coste total</option><option value="waste">Menor desperdicio</option><option value="technical">Índice técnico</option></select></label>
+    <div class="commerce-head"><div><p class="eyebrow">Compra calculada</p><h2 id="board-commerce-title">Tableros reales para tu despiece</h2><p>No mostramos publicidad genérica: calculamos qué formatos comerciales pueden servir para las piezas que acabas de generar.</p></div>
+      <label class="commerce-sort">Ordenar comparación<select data-commerce-sort><option value="value">Calidad-precio</option><option value="cost">Coste total</option><option value="waste">Menor desperdicio</option><option value="technical">Índice técnico</option></select></label>
     </div>
+    <div class="commerce-featured" data-commerce-featured></div>
     <div class="commerce-controls"><label>Ancho de corte<input data-kerf value="0,3" inputmode="decimal"><span>cm</span></label><label class="commerce-check"><input type="checkbox" data-rotate> Permitir girar piezas 90°</label></div>
     <div class="commerce-status" data-commerce-status></div>
     <div class="commerce-winners" data-commerce-winners></div>
@@ -47,6 +48,19 @@ function sortRows(rows,mode){const list=[...rows];if(mode==='cost')return list.s
 function winner(label,row,metric){return row?`<article><span>${esc(label)}</span><b>${esc(row.name)}</b><strong>${esc(metric)}</strong></article>`:'';}
 function knownSpecs(row){return boardCriteria.filter(c=>row.specs?.[c.key]!==null&&row.specs?.[c.key]!==undefined).map(c=>{const value=row.specs[c.key];return{label:c.label,value:typeof value==='boolean'?(value?'Sí':'No'):`${fmt(value,0)}/100`};});}
 
+function featuredCard(row){
+  if(!row)return `<div class="commerce-empty"><strong>1. Genera tu lista de corte</strong><span>2. Compararemos tableros del grosor indicado</span><span>3. Verás aquí el producto recomendado y el enlace directo a la tienda</span><a class="button" href="#cut-form">Generar lista de corte ↑</a></div>`;
+  const score=row.valueScore!==null?`${fmt(row.valueScore,0)}/100`:'Sin nota';
+  return `<article class="commerce-featured-card">
+    <div class="commerce-featured-kicker">Recomendado para tu despiece</div>
+    <div class="commerce-featured-grid">
+      <div><small>${esc(row.retailer)} · precio comprobado ${verifiedAt.split('-').reverse().join('/')}</small><h3>${esc(row.name)}</h3><p>${row.purchase.units} ${row.purchase.units===1?'tablero':'tableros'} para completar las piezas principales · ${fmt(row.purchase.wastePct,1)} % de desperdicio estimado.</p></div>
+      <div class="commerce-featured-score"><b>${score}</b><span>calidad-precio</span></div>
+    </div>
+    <div class="commerce-featured-bottom"><div><strong>${money(row.purchase.projectCost)}</strong><span>coste estimado para tu proyecto</span></div><a class="button button--commerce commerce-featured-link" data-product-link="${esc(row.id)}" href="${esc(row.link.url)}" target="_blank" rel="${row.link.affiliate?'sponsored noopener noreferrer':'noopener noreferrer'}">Ver producto y precio actual ↗</a></div>
+  </article>`;
+}
+
 function card(row,winners){
   const badges=[];
   if(winners.cheapest?.id===row.id)badges.push('Menor coste');
@@ -62,24 +76,34 @@ function card(row,winners){
     <dl class="commerce-metrics"><div><dt>Desperdicio estimado</dt><dd>${fmt(row.purchase.wastePct,1)} %</dd></div><div><dt>Área sobrante</dt><dd>${fmt(row.purchase.waste,2)} m²</dd></div><div><dt>Precio tablero</dt><dd>${money(row.price)}</dd></div><div><dt>Índice técnico</dt><dd>${technical}</dd></div></dl>
     <div class="commerce-features">${(row.featureLabels||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
     <details class="commerce-tech"><summary>Ver criterios técnicos (${coverage}% documentado)</summary><ul>${knownSpecs(row).map(item=>`<li><span>${esc(item.label)}</span><b>${esc(item.value)}</b></li>`).join('')}</ul></details>
-    <a class="button commerce-link" data-product-link="${esc(row.id)}" href="${esc(row.link.url)}" target="_blank" rel="${row.link.affiliate?'sponsored noopener noreferrer':'noopener noreferrer'}">Ver producto en ${esc(row.retailer)} <span aria-hidden="true">↗</span></a>
+    <a class="button button--commerce commerce-link" data-product-link="${esc(row.id)}" href="${esc(row.link.url)}" target="_blank" rel="${row.link.affiliate?'sponsored noopener noreferrer':'noopener noreferrer'}">Ver producto y precio actual en ${esc(row.retailer)} ↗</a>
   </article>`;
+}
+
+function attachTracking(section,rows,kerf){
+  section.querySelectorAll('[data-product-link]').forEach(anchor=>anchor.addEventListener('click',()=>{
+    const product=boardProducts.find(item=>item.id===anchor.dataset.productLink);
+    const row=rows.find(item=>item.id===product?.id);
+    if(product&&row)engine.track('board_product_open',product,{boards:row.purchase.units,project_cost:row.purchase.projectCost,waste_pct:row.purchase.wastePct,panel_thickness:latestResult?.thickness||null,kerf_cm:kerf});
+  }));
 }
 
 function render(){
   ensureStyles();const section=ensureSection();
-  const status=section.querySelector('[data-commerce-status]'),productsHost=section.querySelector('[data-commerce-products]'),winnersHost=section.querySelector('[data-commerce-winners]');
-  if(!latestResult){status.innerHTML='<p>Genera una lista de corte para comparar tableros compatibles con tus piezas.</p>';productsHost.innerHTML='';winnersHost.innerHTML='';return;}
+  const featured=section.querySelector('[data-commerce-featured]'),status=section.querySelector('[data-commerce-status]'),productsHost=section.querySelector('[data-commerce-products]'),winnersHost=section.querySelector('[data-commerce-winners]');
+  if(!latestResult){featured.innerHTML=featuredCard(null);status.innerHTML='<p>El comparador se activará automáticamente al generar el despiece.</p>';productsHost.innerHTML='';winnersHost.innerHTML='';return;}
   const kerf=kerfValue(section),allowRotate=section.querySelector('[data-rotate]')?.checked===true;
   const rows=engine.rank(boardProducts,{calculate:product=>{const result=optimizeBoardCuts(latestResult.parts,product,{targetThickness:latestResult.thickness,kerf,allowRotate});return result.compatible?{units:result.units,purchased:result.purchasedArea,waste:result.wasteArea,projectCost:result.projectCost,unitCost:result.unitCost,wastePct:result.wastePct,pieceArea:result.pieceArea,purchasedArea:result.purchasedArea,boards:result.boards}:null;},technicalCriteria:boardCriteria,economyWeight:.55,technicalWeight:.45,minimumTechnicalCoverage:.8});
   const backParts=latestResult.parts.filter(part=>Math.abs(Number(part.thickness)-Number(latestResult.thickness))>0.011);
-  if(!rows.length){status.innerHTML=`<p><strong>No hay tableros del catálogo actual compatibles con ${fmt(latestResult.thickness,1)} cm de grosor.</strong> El comparador no sustituirá ese grosor por otro parecido.</p>`;productsHost.innerHTML='';winnersHost.innerHTML='';return;}
+  if(!rows.length){featured.innerHTML=`<div class="commerce-empty commerce-empty--warning"><strong>No hay un producto compatible en el catálogo actual</strong><span>Buscamos exactamente ${fmt(latestResult.thickness,1)} cm de grosor; no sustituimos medidas para forzar una recomendación.</span></div>`;status.innerHTML='';productsHost.innerHTML='';winnersHost.innerHTML='';return;}
   const winners=engine.winners(rows),ordered=sortRows(rows,section.querySelector('[data-commerce-sort]')?.value||'value');
+  const recommended=winners.bestValue||winners.cheapest||ordered[0];
+  featured.innerHTML=featuredCard(recommended);
   status.innerHTML=`<div><span>Área de piezas principales</span><b>${fmt(rows[0].purchase.pieceArea,2)} m²</b></div><div><span>Grosor buscado</span><b>${fmt(latestResult.thickness,1)} cm</b></div><div><span>Ancho de corte</span><b>${fmt(kerf,2)} cm</b></div><div><span>Productos compatibles</span><b>${rows.length}</b></div>${backParts.length?'<p>La trasera se excluye de esta comparación porque usa un grosor distinto al tablero principal.</p>':''}`;
   winnersHost.innerHTML=[winner('Menor coste',winners.cheapest,winners.cheapest?money(winners.cheapest.purchase.projectCost):''),winner('Menor desperdicio',winners.leastWaste,winners.leastWaste?`${fmt(winners.leastWaste.purchase.wastePct,1)} %`:''),winner('Mejor calidad-precio',winners.bestValue,winners.bestValue?`${fmt(winners.bestValue.valueScore,0)}/100`:''),winner('Mejor índice técnico',winners.bestTechnical,winners.bestTechnical?`${fmt(winners.bestTechnical.technical.score,0)}/100`:'')].join('');
-  productsHost.innerHTML=ordered.map(row=>card(row,winners)).join('');
-  section.querySelectorAll('[data-product-link]').forEach(anchor=>anchor.addEventListener('click',()=>{const product=boardProducts.find(item=>item.id===anchor.dataset.productLink);const row=rows.find(item=>item.id===product?.id);if(product&&row)engine.track('board_product_open',product,{boards:row.purchase.units,project_cost:row.purchase.projectCost,waste_pct:row.purchase.wastePct,panel_thickness:latestResult.thickness});}));
+  productsHost.innerHTML=`<div class="commerce-list-heading"><span>Comparación completa</span><strong>${rows.length} opciones compatibles</strong></div>${ordered.map(row=>card(row,winners)).join('')}`;
+  attachTracking(section,rows,kerf);
 }
 
-document.addEventListener('estante:cut-result',event=>{latestResult=event.detail;render();});
+document.addEventListener('estante:cut-result',event=>{latestResult=event.detail;render();document.querySelector('#board-commerce')?.scrollIntoView({behavior:'smooth',block:'start'});});
 ensureSection();render();
