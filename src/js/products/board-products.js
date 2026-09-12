@@ -31,6 +31,13 @@ export const boardProducts=[
     featureLabels:['Pino laminado','Lijado grano 80','Emisión E1','Uso interior'],affiliate:{enabled:false,network:'awin',url:''}
   },
   {
+    id:'bauhaus-wbp-250x122x18',name:'Tablero contrachapado WBP de pino 250 × 122 × 1,8 cm',retailer:'BAUHAUS',material:'Contrachapado de pino',length:250,width:122,thickness:1.8,price:64.49,verifiedAt,
+    normalUrl:'https://www.bauhaus.es/tableros-de-contrachapado/tablero-contrachapado-wbp/p/29416417',
+    sourceUrl:'https://www.bauhaus.es/tableros-de-contrachapado/tablero-contrachapado-wbp/p/29416417',
+    specs:{furnitureSuitable:null,surfaceScore:50,certifiedSourcing:null,lowHazard:true,stabilityScore:100},
+    featureLabels:['Contrachapado WBP','Emisión E1','Resistente a humedad','Formato 250 × 122 cm'],affiliate:{enabled:false,network:'awin',url:''}
+  },
+  {
     id:'bauhaus-acacia-220x60x18',name:'Exclusivholz tablero laminado de acacia 220 × 60 × 1,8 cm',retailer:'BAUHAUS',material:'Acacia laminada',length:220,width:60,thickness:1.8,price:46.99,verifiedAt,
     normalUrl:'https://www.bauhaus.es/tableros-de-madera-laminada/exclusivholz-tablero-de-madera-laminada/p/31205975',
     sourceUrl:'https://www.bauhaus.es/tableros-de-madera-laminada/exclusivholz-tablero-de-madera-laminada/p/31205975',
